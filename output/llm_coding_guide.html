@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>如何使用LLM辅助编程 - 高效开发指南</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+            --accent-color: #f59e0b;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --bg-primary: #f9fafb;
+            --bg-secondary: #f3f4f6;
+            --border-color: #e5e7eb;
+            --card-bg: #ffffff;
+        }
+
+        .dark {
+            --primary-color: #60a5fa;
+            --secondary-color: #a78bfa;
+            --accent-color: #fbbf24;
+            --text-primary: #f9fafb;
+            --text-secondary: #e5e7eb;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --border-color: #374151;
+            --card-bg: #1f2937;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-self;
+            line-height: 1.8;
+            transition: background-color 0.3s, color 0.3s;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            color: var(--text-primary);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            width: 48px;
+            height: 24px;
+            border-radius: 12px;
+            background-color: var(--bg-secondary);
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        html.dark .theme-toggle::after {
+            transform: translateX(24px);
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .quote {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 1rem;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .code-block {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            overflow-x: auto;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        /* 修复深色模式下的文本颜色 */
+        .dark .bg-white {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary);
+        }
+
+        .dark .bg-gray-100 {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        .dark .bg-gray-800 {
+            background-color: var(--card-bg) !important;
+        }
+
+        .dark .card {
+            color: var(--text-primary);
+            background-color: var(--card-bg);
+        }
+
+        .dark p,
+        .dark h1,
+        .dark h2,
+        .dark h3,
+        .dark h4,
+        .dark h5,
+        .dark h6 {
+            color: var(--text-primary);
+        }
+
+        .dark .text-gray-800 {
+            color: var(--text-primary) !important;
+        }
+
+        .dark .text-gray-600 {
+            color: var(--text-secondary) !important;
+        }
+
+        /* 确保链接在深色模式下可见 */
+        .dark a:not(.bg-blue-600):not(.bg-white) {
+            color: var(--primary-color);
+        }
+
+        /* 确保导航栏文本在深色模式下可见 */
+        .dark nav a {
+            color: var(--text-primary);
+        }
+
+        /* 确保卡片内容在深色模式下可见 */
+        .dark .card p,
+        .dark .card h4 {
+            color: var(--text-primary);
+        }
+
+        /* 修复深色模式下的背景颜色 */
+        .dark .bg-gray-50 {
+            background-color: var(--bg-primary) !important;
+        }
+
+        .dark .bg-gray-900 {
+            background-color: var(--bg-primary) !important;
+        }
+
+        /* 修复深色模式下的导航栏 */
+        .dark nav.bg-white {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--bg-primary);
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .close-modal {
+            color: var(--text-secondary);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: var(--primary-color);
+        }
+
+        /* 使思维导图可点击 */
+        .mermaid-container {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .mermaid-container::after {
+            content: '点击放大';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mermaid-container:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <header>
+        <nav class="bg-white dark:bg-gray-800 shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-robot text-3xl text-blue-500"></i>
+                    <h1 class="text-xl font-bold">LLM编程指南</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="#" class="hover:text-blue-500 transition-colors duration-200">
+                        <i class="fas fa-home mr-1"></i>首页
+                    </a>
+                    <a href="#key-points" class="hover:text-blue-500 transition-colors duration-200">
+                        <i class="fas fa-key mr-1"></i>关键点
+                    </a>
+                    <a href="#examples" class="hover:text-blue-500 transition-colors duration-200">
+                        <i class="fas fa-code mr-1"></i>示例
+                    </a>
+                    <a href="#visualization" class="hover:text-blue-500 transition-colors duration-200">
+                        <i class="fas fa-chart-network mr-1"></i>可视化
+                    </a>
+                    <div id="theme-toggle" class="theme-toggle flex items-center">
+                        <span class="mr-2 text-sm hidden sm:inline">主题</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="hero py-16 px-4 text-center">
+            <div class="container mx-auto">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">如何使用LLM辅助编程</h1>
+                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">掌握AI辅助编程的技巧，提升开发效率，实现更快速的项目交付</p>
+                <div class="flex justify-center space-x-4">
+                    <a href="#getting-started"
+                        class="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium shadow-md transition-all duration-200">
+                        <i class="fas fa-play-circle mr-2"></i>开始学习
+                    </a>
+                    <a href="#key-points"
+                        class="bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-lg font-medium shadow-md transition-all duration-200">
+                        <i class="fas fa-lightbulb mr-2"></i>关键技巧
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <section id="introduction" class="mb-16">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-6 text-center">为什么有些开发者能从LLM中获益匪浅？</h2>
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8">
+                    <p class="mb-4 text-lg">
+                        在线讨论中，关于使用大型语言模型（LLM）辅助编程的话题总会引发一些开发者的困惑。他们常常疑惑自己做错了什么——为什么有些人报告取得了如此出色的成果，而他们自己的尝试却收效甚微？</p>
+                    <p class="mb-4 text-lg">使用LLM编写代码是困难且不直观的。弄清楚如何在这方面应用它们的边界和局限性需要付出相当的努力，而且几乎没有指导来帮助人们找出最佳应用方式。</p>
+                    <p class="mb-4 text-lg">如果有人告诉你，使用LLM编程很容易，他们可能是（无意中）误导了你。他们可能确实偶然发现了有效的模式，但这些模式并不是对每个人都自然而然地适用。</p>
+                    <p class="text-lg">我已经从LLM中获得了两年多的出色编程辅助效果。这里是我尝试将一些经验和直觉传递给你的方式。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="key-points" class="mb-16">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-center">使用LLM辅助编程的关键点</h2>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card p-6">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-4">
+                                <i class="fas fa-bullseye text-blue-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">设定合理期望</h3>
+                        </div>
+                        <p>忽略"AGI"炒作——LLM仍然是花哨的自动补全工具。如果你假设这项技术会在不需要你运用任何技能的情况下完美实现你的项目，你很快就会失望。</p>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center mr-4">
+                                <i class="fas fa-calendar-alt text-purple-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">考虑训练截止日期</h3>
+                        </div>
+                        <p>任何模型的一个关键特性是其训练截止日期。这对代码非常重要，因为它影响模型熟悉哪些库。如果你使用的库在截止日期后有重大变更，模型可能不了解这些变化！</p>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mr-4">
+                                <i class="fas fa-crown text-green-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">上下文为王</h3>
+                        </div>
+                        <p>从LLM获得良好结果的大部分技巧都归结为管理其上下文——作为当前对话一部分的文本。这不仅仅是你提供的提示：成功的LLM交互通常采取对话形式。</p>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center mr-4">
+                                <i class="fas fa-list-ul text-red-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">请求多个选项</h3>
+                        </div>
+                        <p>大多数项目都从一些开放性问题开始：我尝试做的事情可能吗？有哪些潜在的实现方式？哪些选项最好？我将LLM作为初始研究阶段的一部分。</p>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center mr-4">
+                                <i class="fas fa-directions text-yellow-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">明确指示任务</h3>
+                        </div>
+                        <p>一旦完成初步研究，我会显著改变模式。对于生产代码，我的LLM使用更加专制：我将其视为数字实习生，根据我的详细指示为我编写代码。</p>
+                    </div>
+
+                    <div class="card p-6">
+                        <div class="flex items-center mb-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center mr-4">
+                                <i class="fas fa-vial text-indigo-500 text-xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold">必须测试生成的代码</h3>
+                        </div>
+                        <p>作为软件开发人员，你的责任是交付工作系统。如果你没有看到它运行，那就不是一个工作系统。你需要加强那些手动QA习惯，这一直是交付好代码的关键部分。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples" class="mb-16">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-center">实际应用示例</h2>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8">
+                    <h3 class="text-2xl font-bold mb-4">使用Claude Code的详细示例</h3>
+                    <p class="mb-4">
+                        在撰写本文时，我想为我的工具网站创建一个新的"colophon"页面，这个页面可以展示每个工具的提交历史，并以更明显的方式链接到GitHub。我决定利用这个机会来演示我的AI辅助编码过程。
+                    </p>
+                    <p class="mb-4">对于这个项目，我使用了Claude Code，因为我希望它能够直接在我的笔记本电脑上针对我现有的工具库运行Python代码。</p>
+
+                    <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">会话结束时运行/cost命令显示：</p>
+                        <pre class="code-block">
+> /cost 
+  ⎿  Total cost: $0.61
+     Total duration (API): 5m 31.2s
+     Total duration (wall): 17m 18.7s</pre>
+                    </div>
+
+                    <p class="mb-4">整个项目从开始到完成只花了我17分钟多一点，API调用花费了61美分。</p>
+                    <p class="mb-4">我使用了专制流程，告诉模型我想要构建什么。以下是我的提示序列：</p>
+
+                    <div class="quote mb-6">
+                        <p class="mb-2">
+                            几乎所有这个目录中的HTML文件都是使用Claude提示创建的，这些提示的详细信息都链接在提交消息中。构建一个Python脚本，依次检查每个HTML文件的提交历史，并从这些提交消息中提取任何URL到一个列表中。然后它应该输出一个具有这种结构的JSON文件：{"pages":
+                            {"name-of-file.html": ["url"], {"name-of-file-2.html": ["url1", "url2"],
+                            ...——如你所见，有些文件在其提交历史中可能有多个URL。脚本应该命名为gather_links.py，它应该保存一个名为gathered_links.json的JSON文件</p>
+                    </div>
+
+                    <p class="mb-4">我检查了初始结果并发现了一些问题：</p>
+
+                    <div class="quote mb-6">
+                        <p class="mb-2">看起来它只获取了URL的开头，它应该获取整个URL，可能是到不同网站的——所以只获取任何以https://开头并以空格或提交消息结尾的内容</p>
+                    </div>
+
+                    <p class="mb-4">然后我改变了主意——我还想要那些完整的提交消息：</p>
+
+                    <div class="quote mb-6">
+                        <p class="mb-2">更新脚本——我想捕获完整的提交消息和URL——新格式应该是{"pages": {"aria-live-regions.html": {"commits":
+                            [{"hash": hash, "message": message, "date": iso格式日期], "urls": [像之前一样的URL列表]</p>
+                    </div>
+
+                    <p class="mb-4">提供这样的例子是获得你想要的东西的一个很好的捷径。</p>
+                    <p class="mb-4">请注意，我从未查看它在gather_links.py中编写的代码！这是纯粹的氛围编码：我在看它在做什么，但我完全把实现细节留给了LLM。</p>
+                    <p class="mb-4">JSON看起来不错，所以我说：</p>
+
+                    <div class="quote mb-6">
+                        <p class="mb-2">
+                            这工作得很好。给我写一个名为build_colophon.py的新脚本，它查看那个收集的JSON文件并构建和保存一个HTML页面。该页面应该是移动友好的，并应列出每个页面——带有指向该页面的链接——并为每个页面整齐地显示提交消息（将换行符转换为br并链接URL但没有其他格式）——加上提交消息日期和指向提交本身的链接，这些链接在https://github.com/simonw/tools中
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold mb-4">关于代码库的回答问题</h3>
+                    <p class="mb-4">如果使用LLM为你编写代码的想法仍然让你感到深深的不安，那么它们的另一个用例可能会让你更有说服力。</p>
+                    <p class="mb-4">好的LLM非常擅长回答关于代码的问题。</p>
+                    <p class="mb-4">这也是非常低风险的：最坏的情况是它们可能会出错，这可能会让你花费更多一点时间来弄清楚。与完全靠自己挖掘数千行代码相比，它仍然可能为你节省时间。</p>
+                    <p class="mb-4">这里的技巧是将代码转储到一个长上下文模型中并开始提问。我目前最喜欢的是名为gemini-2.0-pro-exp-02-05的模型，这是Google的Gemini 2.0
+                        Pro的预览版，目前可以通过他们的API免费使用。</p>
+                    <p class="mb-4">
+                        我就在前几天使用了这个技巧。我正在尝试一个对我来说新的工具，叫做monolith，这是一个用Rust编写的CLI工具，它下载一个网页和它所有的依赖资产（CSS，图像等），并将它们捆绑在一起成为一个单一的归档文件。
+                    </p>
+                    <p class="mb-4">我很好奇它是如何工作的，所以我将它克隆到我的临时目录并运行了这些命令：</p>
+
+                    <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                        <pre class="code-block">
+cd /tmp
+git clone https://github.com/Y2Z/monolith
+cd monolith
+files-to-prompt . -c | llm -m gemini-2.0-pro-exp-02-05 \
+  -s 'architectural overview as markdown '</pre>
+                    </div>
+
+                    <p class="mb-4">我在这里使用我自己的files-to-prompt工具（去年由Claude 3
+                        Opus为我构建）来收集存储库中所有文件的内容到一个单一流中。然后我将其通过管道传输到我的LLM工具，并告诉它（通过llm-gemini插件）使用"architectural overview
+                        as markdown"的系统提示来提示Gemini 2.0 Pro。</p>
+                    <p class="mb-4">这给了我一份详细的文档，描述了该工具是如何工作的——哪些源文件做什么，以及至关重要的是，它使用了哪些Rust
+                        crates。我了解到它使用了reqwest、html5ever、markup5ever_rcdom和cssparser，而且它根本不评估JavaScript，这是一个重要的限制。</p>
+                    <p class="mb-4">我每周使用这个技巧好几次。这是开始深入研究新代码库的好方法——而且通常替代方案不是在这上面花更多时间，而是完全无法满足我的好奇心。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="visualization" class="mb-16">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-center">LLM辅助编程思维导图</h2>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8">
+                    <div class="mermaid-container" onclick="openModal('mindmap-modal')">
+                        <div class="mermaid">
+                            graph TD
+                            A[如何使用LLM辅助编程] --> B[设定合理期望]
+                            A --> C[考虑训练截止日期]
+                            A --> D[上下文为王]
+                            A --> E[请求多个选项]
+                            A --> F[明确指示任务]
+                            A --> G[必须测试生成的代码]
+                            A --> H[记住这是一场对话]
+                            A --> I[使用能为你运行代码的工具]
+
+                            B --> B1[LLM是高级自动补全工具]
+                            B --> B2[增强而非替代你的能力]
+                            B --> B3[将其视为过度自信的配对编程助手]
+
+                            C --> C1[了解模型的训练截止日期]
+                            C --> C2[选择稳定且流行的库]
+                            C --> C3[对于新库需要提供更多上下文]
+
+                            D --> D1[管理对话上下文]
+                            D --> D2[新对话重置上下文]
+                            D --> D3[利用先前回复作为上下文的一部分]
+
+                            E --> E1[用于初始研究阶段]
+                            E --> E2[探索实现可能性]
+                            E --> E3[比较不同方法的优缺点]
+
+                            F --> F1[提供详细指示]
+                            F --> F2[指定函数签名]
+                            F --> F3[明确技术选择]
+
+                            G --> G1[开发者负责确保代码工作]
+                            G --> G2[加强手动QA习惯]
+                            G --> G3[如果没有看到它运行，它就不是工作系统]
+
+                            H --> H1[不满意结果时进行反馈]
+                            H --> H2[要求重构或改进]
+                            H --> H3[迭代改进初始结果]
+
+                            I --> I1[ChatGPT代码解释器]
+                            I --> I2[Claude Artifacts]
+                            I --> I3[Claude Code]
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold mb-6 text-center">LLM辅助编程的最大优势：开发速度</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="text-center">
+                            <div
+                                class="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-bolt text-blue-500 text-3xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">加速开发</h4>
+                            <p>从构思到完成的时间显著缩短，使更多项目成为可能</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div
+                                class="w-24 h-24 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-brain text-green-500 text-3xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">放大现有专业知识</h4>
+                            <p>LLM不会替代你的专业知识，而是放大它，使你能够更有效地应用</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div
+                                class="w-24 h-24 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-graduation-cap text-purple-500 text-3xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">加速学习</h4>
+                            <p>通过实现更多想法，你可以更快地学习新技术和方法</p>
+                        </div>
+                    </div>
+
+                    <div class="quote">
+                        <p class="mb-2">我如此关心从LLM获得的生产力提升的原因：这不是为了更快地完成工作，而是为了能够交付那些我本来无法证明值得花时间的项目。</p>
+                        <p>— Simon Willison</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="further-reading" class="mb-16">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-center">延伸阅读</h2>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+                    <p class="mb-6 text-center text-lg">以下是一些推荐的资源，可以帮助你进一步探索LLM辅助编程的世界：</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card p-6">
+                            <h4 class="text-xl font-bold mb-2">《Prompt Engineering for Developers》</h4>
+                            <p class="mb-2">作者：Andrew Ng</p>
+                            <p class="mb-4">这本指南提供了关于如何为开发任务编写有效提示的详细说明，特别关注代码生成和调试。</p>
+                            <a href="https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/"
+                                class="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                                target="_blank">
+                                <i class="fas fa-external-link-alt mr-1"></i>了解更多
+                            </a>
+                        </div>
+
+                        <div class="card p-6">
+                            <h4 class="text-xl font-bold mb-2">《AI-Assisted Development》</h4>
+                            <p class="mb-2">作者：Simon Willison</p>
+                            <p class="mb-4">探索如何将AI工具整合到开发工作流程中，包括实际案例研究和最佳实践。</p>
+                            <a href="https://simonwillison.net/2023/Mar/27/ai-enhanced-development/"
+                                class="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                                target="_blank">
+                                <i class="fas fa-external-link-alt mr-1"></i>了解更多
+                            </a>
+                        </div>
+
+                        <div class="card p-6">
+                            <h4 class="text-xl font-bold mb-2">《The Pragmatic Programmer》（2020版）</h4>
+                            <p class="mb-2">作者：David Thomas & Andrew Hunt</p>
+                            <p class="mb-4">这本经典著作的更新版包含了关于如何在保持软件工艺的同时利用AI工具的见解。</p>
+                            <a href="https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/"
+                                class="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                                target="_blank">
+                                <i class="fas fa-external-link-alt mr-1"></i>了解更多
+                            </a>
+                        </div>
+
+                        <div class="card p-6">
+                            <h4 class="text-xl font-bold mb-2">《Building LLM-Powered Applications》</h4>
+                            <p class="mb-2">作者：Gergely Orosz</p>
+                            <p class="mb-4">一本实用指南，介绍如何构建和部署利用大型语言模型的应用程序，重点关注软件开发用例。</p>
+                            <a href="https://newsletter.pragmaticengineer.com/p/building-llm-powered-apps"
+                                class="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                                target="_blank">
+                                <i class="fas fa-external-link-alt mr-1"></i>了解更多
+                            </a>
+                        </div>
+
+                        <div class="card p-6">
+                            <h4 class="text-xl font-bold mb-2">《Anthropic Claude API文档》</h4>
+                            <p class="mb-2">作者：Anthropic团队</p>
+                            <p class="mb-4">全面的API文档，详细介绍了如何有效地使用Claude进行代码生成和代码理解任务。</p>
+                            <a href="https://docs.anthropic.com/claude/docs"
+                                class="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                                target="_blank">
+                                <i class="fas fa-external-link-alt mr-1"></i>了解更多
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-100 dark:bg-gray-800 py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="flex items-center justify-center mb-6">
+                    <i class="fas fa-robot text-4xl text-blue-500 mr-4"></i>
+                    <h2 class="text-2xl font-bold">LLM编程指南</h2>
+                </div>
+                <p class="mb-6 text-gray-600 dark:text-gray-400">本指南基于Simon Willison的文章<a
+                        href="https://simonwillison.net/2025/Mar/11/using-llms-for-code/"
+                        class="text-blue-500 hover:text-blue-700 transition-colors duration-200" target="_blank">《Here's
+                        how I use LLMs to help me write code》</a>改编而成，旨在帮助开发者更好地利用大型语言模型进行编程。</p>
+                <div class="flex justify-center space-x-6 mb-8">
+                    <a href="https://github.com/simonw/llm"
+                        class="text-gray-600 dark:text-gray-400 hover:text-blue-500 transition-colors duration-200"
+                        target="_blank">
+                        <i class="fab fa-github text-2xl"></i>
+                    </a>
+                    <a href="https://twitter.com/simonw"
+                        class="text-gray-600 dark:text-gray-400 hover:text-blue-500 transition-colors duration-200"
+                        target="_blank">
+                        <i class="fab fa-twitter text-2xl"></i>
+                    </a>
+                    <a href="mailto:contact@example.com"
+                        class="text-gray-600 dark:text-gray-400 hover:text-blue-500 transition-colors duration-200">
+                        <i class="fas fa-envelope text-2xl"></i>
+                    </a>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-500">© 2023 LLM编程指南 | 使用 <i
+                        class="fas fa-heart text-red-500"></i> 和 AI 制作</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="mindmap-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('mindmap-modal')">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">LLM辅助编程思维导图</h2>
+            <div id="modal-mermaid-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化深色/浅色模式
+        function initTheme() {
+            // 检查系统偏好
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // 检查本地存储
+            const storedTheme = localStorage.getItem('theme');
+
+            if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            // 应用CSS变量
+            applyThemeStyles();
+        }
+
+        // 切换主题
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+
+            // 应用CSS变量
+            applyThemeStyles();
+
+            // 重新初始化Mermaid图表以适应新主题
+            initMermaid();
+        }
+
+        // 应用主题样式
+        function applyThemeStyles() {
+            // 强制重新应用CSS变量
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // 触发重排
+            document.body.style.display = '';
+
+            // 确保所有卡片和背景元素应用正确的样式
+            const isDark = document.documentElement.classList.contains('dark');
+
+            // 更新所有白色背景元素
+            document.querySelectorAll('.bg-white').forEach(el => {
+                if (isDark) {
+                    el.style.backgroundColor = 'var(--card-bg)';
+                    el.style.color = 'var(--text-primary)';
+                } else {
+                    el.style.backgroundColor = '';
+                    el.style.color = '';
+                }
+            });
+
+            // 更新所有卡片
+            document.querySelectorAll('.card').forEach(el => {
+                if (isDark) {
+                    el.style.backgroundColor = 'var(--card-bg)';
+                    el.style.color = 'var(--text-primary)';
+                } else {
+                    el.style.backgroundColor = '';
+                    el.style.color = '';
+                }
+            });
+        }
+
+        // 初始化Mermaid图表
+        function initMermaid() {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+                securityLevel: 'loose'
+            });
+
+            // 重新渲染所有图表
+            mermaid.init(undefined, '.mermaid');
+        }
+
+        // 模态框功能
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                // 如果是思维导图模态框，准备图表内容
+                if (modalId === 'mindmap-modal') {
+                    const container = document.getElementById('modal-mermaid-container');
+                    if (container) {
+                        // 清空容器
+                        container.innerHTML = '';
+
+                        // 创建新的mermaid div
+                        const mermaidDiv = document.createElement('div');
+                        mermaidDiv.className = 'mermaid';
+                        mermaidDiv.innerHTML = `
+                            graph TD
+                            A[如何使用LLM辅助编程] --> B[设定合理期望]
+                            A --> C[考虑训练截止日期]
+                            A --> D[上下文为王]
+                            A --> E[请求多个选项]
+                            A --> F[明确指示任务]
+                            A --> G[必须测试生成的代码]
+                            A --> H[记住这是一场对话]
+                            A --> I[使用能为你运行代码的工具]
+
+                            B --> B1[LLM是高级自动补全工具]
+                            B --> B2[增强而非替代你的能力]
+                            B --> B3[将其视为过度自信的配对编程助手]
+
+                            C --> C1[了解模型的训练截止日期]
+                            C --> C2[选择稳定且流行的库]
+                            C --> C3[对于新库需要提供更多上下文]
+
+                            D --> D1[管理对话上下文]
+                            D --> D2[新对话重置上下文]
+                            D --> D3[利用先前回复作为上下文的一部分]
+
+                            E --> E1[用于初始研究阶段]
+                            E --> E2[探索实现可能性]
+                            E --> E3[比较不同方法的优缺点]
+
+                            F --> F1[提供详细指示]
+                            F --> F2[指定函数签名]
+                            F --> F3[明确技术选择]
+
+                            G --> G1[开发者负责确保代码工作]
+                            G --> G2[加强手动QA习惯]
+                            G --> G3[如果没有看到它运行，它就不是工作系统]
+
+                            H --> H1[不满意结果时进行反馈]
+                            H --> H2[要求重构或改进]
+                            H --> H3[迭代改进初始结果]
+
+                            I --> I1[ChatGPT代码解释器]
+                            I --> I2[Claude Artifacts]
+                            I --> I3[Claude Code]
+                        `;
+
+                        // 添加到容器
+                        container.appendChild(mermaidDiv);
+                    }
+                }
+
+                // 显示模态框
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden'; // 防止背景滚动
+
+                // 重新渲染模态框中的图表
+                setTimeout(() => {
+                    // 完全重新初始化Mermaid
+                    mermaid.initialize({
+                        startOnLoad: false,
+                        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+                        securityLevel: 'loose'
+                    });
+
+                    // 渲染模态框中的图表
+                    if (modalId === 'mindmap-modal') {
+                        const container = document.getElementById('modal-mermaid-container');
+                        if (container) {
+                            const mermaidDiv = container.querySelector('.mermaid');
+                            if (mermaidDiv) {
+                                mermaid.init(undefined, mermaidDiv);
+                            }
+                        }
+                    }
+                }, 300);
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // 点击模态框背景关闭
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            initTheme();
+            initMermaid();
+
+            // 为主题切换按钮添加事件监听器
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', toggleTheme);
+            }
+
+            // 为ESC键添加关闭模态框的功能
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    document.querySelectorAll('.modal.show').forEach(modal => {
+                        modal.classList.remove('show');
+                    });
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // 监听系统主题变化
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', initTheme);
+        }
+    </script>
+</body>
+
+</html>

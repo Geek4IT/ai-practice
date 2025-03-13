@@ -1,0 +1,153 @@
+--- 第 11 页 ---
+Summary
+Success in the LLM space isn't about building the most sophisticated
+system. It's about building the right system for your needs. Start with
+simple prompts, optimize them with comprehensive evaluation, and
+add multistep agentic systems only when simpler solutions fall short.
+When implementing agents, we try to follow three core principles:
+. Maintain simplicity in your agent's design.
+. Prioritize transparency by explicitly showing the agent’s planning
+steps.
+. Carefully craft your agentcomputer interface ACI through
+thorough tool documentation and testing.
+Frameworks can help you get started quickly, but don't hesitate to
+reduce abstraction layers and build with basic components as you
+move to production. By following these principles, you can create
+agents that are not only powerful but also reliable, maintainable, and
+trusted by their users.
+Acknowledgements
+Written by Erik Schluntz and Barry Zhang. This work draws upon our
+experiences building agents at Anthropic and the valuable insights
+shared by our customers, for which we're deeply grateful.
+Appendix 1: Agents in practice
+Our work with customers has revealed two particularly promising
+applications for AI agents that demonstrate the practical value of the
+patterns discussed above. Both applications illustrate how agents add
+the most value for tasks that require both conversation and action,
+have clear success criteria, enable feedback loops, and integrate
+meaningful human oversight.2024/12/22 16:07 Building effective agents \ Anthropic
+https://www.anthropic.com/research/building-effective-agents 11/15
+
+--- 第 12 页 ---
+A. Customer support
+Customer support combines familiar chatbot interfaces with enhanced
+capabilities through tool integration. This is a natural fit for more
+openended agents because:
+Support interactions naturally follow a conversation flow while
+requiring access to external information and actions;
+Tools can be integrated to pull customer data, order history, and
+knowledge base articles;
+Actions such as issuing refunds or updating tickets can be handled
+programmatically; and
+Success can be clearly measured through userdefined resolutions.
+Several companies have demonstrated the viability of this approach
+through usagebased pricing models that charge only for successful
+resolutions, showing confidence in their agents' effectiveness.
+B. Coding agents
+The software development space has shown remarkable potential for
+LLM features, with capabilities evolving from code completion to
+autonomous problemsolving. Agents are particularly effective
+because:
+Code solutions are verifiable through automated tests;
+Agents can iterate on solutions using test results as feedback;
+The problem space is welldefined and structured; and
+Output quality can be measured objectively.
+In our own implementation, agents can now solve real GitHub issues
+in the SWEbench Verified benchmark based on the pull request
+description alone. However, whereas automated testing helps verify
+functionality, human review remains crucial for ensuring solutions
+align with broader system requirements.
+Appendix 2: Prompt engineering
+your tools2024/12/22 16:07 Building effective agents \ Anthropic
+https://www.anthropic.com/research/building-effective-agents 12/15
+
+--- 第 13 页 ---
+No matter which agentic system you're building, tools will likely be an
+important part of your agent. Tools enable Claude to interact with
+external services and APIs by specifying their exact structure and
+definition in our API. When Claude responds, it will include a tool use
+block in the API response if it plans to invoke a tool. Tool definitions
+and specifications should be given just as much prompt engineering
+attention as your overall prompts. In this brief appendix, we describe
+how to prompt engineer your tools.
+There are often several ways to specify the same action. For instance,
+you can specify a file edit by writing a diff, or by rewriting the entire
+file. For structured output, you can return code inside markdown or
+inside JSON. In software engineering, differences like these are
+cosmetic and can be converted losslessly from one to the other.
+However, some formats are much more difficult for an LLM to write
+than others. Writing a diff requires knowing how many lines are
+changing in the chunk header before the new code is written. Writing
+code inside JSON compared to markdown requires extra escaping of
+newlines and quotes.
+Our suggestions for deciding on tool formats are the following:
+Give the model enough tokens to "think" before it writes itself into
+a corner.
+Keep the format close to what the model has seen naturally
+occurring in text on the internet.
+Make sure there's no formatting "overhead" such as having to keep
+an accurate count of thousands of lines of code, or stringescaping
+any code it writes.
+One rule of thumb is to think about how much effort goes into human
+computer interfaces HCI, and plan to invest just as much effort in
+creating good agentcomputer interfaces ACI. Here are some
+thoughts on how to do so:
+Put yourself in the model's shoes. Is it obvious how to use this tool,
+based on the description and parameters, or would you need to
+think carefully about it? If so, then it’s probably also true for the
+model. A good tool definition often includes example usage, edge2024/12/22 16:07 Building effective agents \ Anthropic
+https://www.anthropic.com/research/building-effective-agents 13/15
+
+--- 第 14 页 ---
+cases, input format requirements, and clear boundaries from other
+tools.
+How can you change parameter names or descriptions to make
+things more obvious? Think of this as writing a great docstring for
+a junior developer on your team. This is especially important when
+using many similar tools.
+Test how the model uses your tools: Run many example inputs in
+our workbench to see what mistakes the model makes, and iterate.
+Pokayoke your tools. Change the arguments so that it is harder to
+make mistakes.
+While building our agent for SWEbench, we actually spent more time
+optimizing our tools than the overall prompt. For example, we found
+that the model would make mistakes with tools using relative filepaths
+after the agent had moved out of the root directory. To fix this, we
+changed the tool to always require absolute filepathsand we found
+that the model used this method flawlessly.
+Clude
+API
+Tem
+Pricing
+Reserch
+Compny
+Customers
+News
+CreersPress
+Inquiries
+Support
+Sttus
+Avilbility
+Twitter
+LinkedIn
+YouTubeTerms of
+Service 
+Consumer
+Terms of
+Service 
+Commercil
+Privcy
+Policy
+Usge Policy
+Responsible
+Disclosure
+Policy
+Complince2024/12/22 16:07 Building effective agents \ Anthropic
+https://www.anthropic.com/research/building-effective-agents 14/15
+
+--- 第 15 页 ---
+Privacy
+Choices
+© 2024 Anthropic PBC2024/12/22 16:07 Building effective agents \ Anthropic
+https://www.anthropic.com/research/building-effective-agents 15/15
+

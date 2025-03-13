@@ -1,0 +1,9 @@
+PDF文件: Building effective agents _ Anthropic.pdf
+总页数: 15
+批次大小: 5
+总批次数: 3
+
+批次文件列表:
+  - agents_pdf_batch_001.txt (页码 1 到 5)
+  - agents_pdf_batch_002.txt (页码 6 到 10)
+  - agents_pdf_batch_003.txt (页码 11 到 15)

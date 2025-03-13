@@ -1,0 +1,105 @@
+<main class="container mx-auto px-4 py-12">
+    <section id="introduction" class="mb-16">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold mb-6 text-center">简介</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8">
+                <p class="mb-4 text-lg">
+                    在过去的一年中，Anthropic与数十个团队合作，在各行各业构建基于大型语言模型（LLM）的代理系统。我们发现，最成功的实现并不是使用复杂的框架或专门的库，而是采用简单、可组合的模式构建。
+                </p>
+                <p class="mb-4 text-lg">
+                    在本指南中，我们分享了从与客户合作和自己构建代理系统中学到的经验，并为开发者提供构建高效代理的实用建议。
+                </p>
+                <div class="bg-indigo-50 dark:bg-indigo-900 p-6 rounded-lg my-6">
+                    <p class="text-lg font-medium text-indigo-700 dark:text-indigo-300">
+                        <i class="fas fa-lightbulb text-indigo-500 mr-2"></i>关键要点
+                    </p>
+                    <ul class="list-disc pl-6 mt-2 space-y-2 text-indigo-700 dark:text-indigo-300">
+                        <li>简单胜于复杂 - 最成功的代理系统采用简单、可组合的模式</li>
+                        <li>明确区分工作流和代理的架构差异</li>
+                        <li>选择适合特定任务的正确方法，而不是盲目追求复杂性</li>
+                        <li>了解何时使用框架，以及何时直接使用LLM API</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="what-are-agents" class="mb-16">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold mb-6 text-center">什么是代理？</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+                <p class="mb-4 text-lg">
+                    "代理"（Agent）可以有多种定义方式。一些客户将代理定义为完全自主的系统，能够在较长时间内独立运行，使用各种工具完成复杂任务。另一些人则用这个术语描述更具规定性的实现，这些实现遵循预定义的工作流程。
+                </p>
+                <p class="mb-4 text-lg">
+                    在Anthropic，我们将所有这些变体归类为代理系统（agentic systems），但在工作流（workflows）和代理（agents）之间做出了重要的架构区分：
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8 my-8">
+                    <div class="card p-6 bg-indigo-50 dark:bg-indigo-900/30 border-indigo-200 dark:border-indigo-800">
+                        <h3 class="text-xl font-bold mb-4 text-indigo-700 dark:text-indigo-300">工作流（Workflows）</h3>
+                        <p class="text-indigo-700 dark:text-indigo-300">
+                            工作流是通过预定义的代码路径来编排LLM和工具的系统。在这种系统中，执行流程是固定的，LLM主要负责处理每个步骤中的特定任务。
+                        </p>
+                    </div>
+
+                    <div class="card p-6 bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-800">
+                        <h3 class="text-xl font-bold mb-4 text-purple-700 dark:text-purple-300">代理（Agents）</h3>
+                        <p class="text-purple-700 dark:text-purple-300">
+                            代理则是LLM动态指导自己的处理过程和工具使用的系统，保持对如何完成任务的控制权。在这种系统中，LLM可以自主决定下一步行动和使用哪些工具。
+                        </p>
+                    </div>
+                </div>
+
+                <p class="text-lg">
+                    在本指南的后续部分，我们将详细探讨这两种代理系统类型，并在附录1"实践中的代理"中描述客户在使用这些系统时发现特别有价值的两个领域。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="when-to-use" class="mb-16">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold mb-6 text-center">何时（不）使用代理</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+                <p class="mb-4 text-lg">
+                    在构建基于LLM的应用程序时，我们建议寻找尽可能简单的解决方案，只有在需要时才增加复杂性。这可能意味着根本不构建代理系统。代理系统通常会用延迟和成本换取更好的任务性能，你应该考虑这种权衡何时有意义。
+                </p>
+                <p class="mb-4 text-lg">
+                    当需要更多复杂性时，工作流为定义良好的任务提供可预测性和一致性，而代理则是在需要大规模灵活性和模型驱动决策时的更好选择。然而，对于许多应用程序，优化单个LLM调用（配合检索和上下文示例）通常就足够了。
+                </p>
+
+                <div
+                    class="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-lg my-6 border border-yellow-200 dark:border-yellow-800">
+                    <p class="text-lg font-medium text-yellow-700 dark:text-yellow-300 mb-2">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>选择合适的方法
+                    </p>
+                    <ul class="list-disc pl-6 space-y-2 text-yellow-700 dark:text-yellow-300">
+                        <li><strong>单个LLM调用</strong>：适用于简单任务，使用检索和上下文示例优化</li>
+                        <li><strong>工作流</strong>：适用于定义良好的任务，需要可预测性和一致性</li>
+                        <li><strong>代理</strong>：适用于需要灵活性和模型驱动决策的复杂任务</li>
+                    </ul>
+                </div>
+
+                <h3 class="text-2xl font-bold mt-8 mb-4">何时以及如何使用框架</h3>
+                <p class="mb-4 text-lg">
+                    有许多框架可以使代理系统更容易实现，包括：
+                </p>
+                <ul class="list-disc pl-8 mb-6 space-y-2">
+                    <li>LangChain的LangGraph</li>
+                    <li>Amazon Bedrock的AI Agent框架</li>
+                    <li>Rivet，一个拖放式GUI LLM工作流构建器</li>
+                    <li>Vellum，另一个用于构建和测试复杂工作流的GUI工具</li>
+                </ul>
+                <p class="mb-4 text-lg">
+                    这些框架通过简化标准的低级任务（如调用LLM、定义和解析工具以及链接调用）使入门变得容易。然而，它们通常会创建额外的抽象层，这可能会掩盖底层的提示和响应，使调试变得更加困难。它们还可能诱使你在简单设置就足够的情况下增加复杂性。
+                </p>
+                <p class="text-lg">
+                    我们建议开发者首先直接使用LLM API：许多模式可以用几行代码实现。如果你确实使用框架，请确保你理解底层代码。对底层内容的错误假设是客户错误的常见来源。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 更多部分将在后续步骤中添加 -->
+</main>
